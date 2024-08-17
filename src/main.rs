@@ -7,7 +7,7 @@ use std::{fs, process};
 #[derive(Parser)]
 #[command(version, about)]
 struct Args {
-    // The path to the image or directory to resize
+    #[arg(help = "The path to the image or directory to resize")]
     target: PathBuf,
 
     #[arg(
