@@ -31,12 +31,12 @@ fn main() {
     } = args;
 
     if !target.exists() {
-        eprintln!("The target {:?} does not exist", target);
+        eprintln!("{:?} does not exist", target);
         process::exit(1);
     }
 
     if directory.exists() && !directory.is_dir() {
-        eprintln!("The directory {:?} is not directory", directory);
+        eprintln!("{:?} is not directory", directory);
         process::exit(1);
     }
 
