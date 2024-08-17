@@ -1,6 +1,7 @@
 use clap::Parser;
 use image::imageops::FilterType;
 use mozjpeg::{ColorSpace, Compress, ScanMode};
+use rayon::prelude::*;
 use std::path::PathBuf;
 use std::{fs, process};
 
@@ -40,7 +41,7 @@ fn main() {
         process::exit(1);
     }
 
-    let image_paths: Vec<PathBuf> = if target.is_dir() {
+    let image_paths = if target.is_dir() {
         target
             .read_dir()
             .expect("Failed to read directory")
@@ -64,10 +65,10 @@ fn main() {
         if !directory.exists() {
             fs::create_dir(&directory).expect("Failed to create directory");
         }
-        for image_path in image_paths.iter() {
-            for target_size in sizes.iter() {
+        image_paths.par_iter().for_each(|image_path| {
+            sizes.par_iter().for_each(|size| {
                 let (resized_image_data, resized_width, resized_height) =
-                    match resize(image_path, *target_size) {
+                    match resize(image_path, *size) {
                         Ok(v) => v,
                         Err(e) => {
                             eprintln!("Failed to resize image {:?}: {}", image_path, e);
@@ -85,13 +86,13 @@ fn main() {
                 let filename = format!(
                     "{}_{}.jpg",
                     image_path.file_stem().unwrap().to_string_lossy(),
-                    target_size,
+                    size,
                 );
                 let output_path = directory.join(&filename);
                 let _ = fs::write(output_path, compressed);
                 println!("Resized {:?}", &filename);
-            }
-        }
+            })
+        })
     }
 }
 
